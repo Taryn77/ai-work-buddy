@@ -37,19 +37,17 @@ export const Route = createFileRoute("/chat")({
   component: ChatPage,
 });
 
-function loadHistory(): Promise<UIMessage[]> {
-  return supabase
+async function loadHistory(): Promise<UIMessage[]> {
+  const { data } = await supabase
     .from("chat_messages")
     .select("id, role, content, created_at")
-    .order("created_at", { ascending: true })
-    .then(({ data }) => {
-      if (!data) return [];
-      return data.map((m) => ({
-        id: m.id,
-        role: m.role as "user" | "assistant",
-        parts: [{ type: "text", text: m.content }],
-      })) as UIMessage[];
-    });
+    .order("created_at", { ascending: true });
+  if (!data) return [];
+  return data.map((m) => ({
+    id: m.id,
+    role: m.role as "user" | "assistant",
+    parts: [{ type: "text", text: m.content }],
+  })) as UIMessage[];
 }
 
 function ChatPage() {
