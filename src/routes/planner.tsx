@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { planTasks } from "@/lib/ai.functions";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { PLANNER_PREFILL_KEY } from "@/lib/extract-action-items";
 
 export const Route = createFileRoute("/planner")({
   head: () => ({
@@ -33,6 +34,21 @@ function PlannerPage() {
   const qc = useQueryClient();
   const [tasks, setTasks] = useState("");
   const [text, setText] = useState("");
+
+  useEffect(() => {
+    try {
+      const prefill = sessionStorage.getItem(PLANNER_PREFILL_KEY);
+      if (prefill) {
+        setTasks(prefill);
+        sessionStorage.removeItem(PLANNER_PREFILL_KEY);
+        toast.success("Action items loaded from your meeting summary");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+
 
   const mut = useMutation({
     mutationFn: () => fn({ data: { tasks } }),
