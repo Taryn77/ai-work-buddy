@@ -40,7 +40,7 @@ function Dashboard() {
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
       <PageHeader
-        title="Good day 👋"
+        title="Good day"
         description="Your AI workspace at a glance. Pick a tool to get started."
       />
 
