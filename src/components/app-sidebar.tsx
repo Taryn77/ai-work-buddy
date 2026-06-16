@@ -7,6 +7,8 @@ import {
   Telescope,
   MessageSquare,
   Settings,
+  Briefcase,
+  Sparkles,
 } from "lucide-react";
 import {
   Sidebar,
