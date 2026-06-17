@@ -59,6 +59,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.18.0",
+    "mammoth": "^1.12.0",
     "motion": "^12.40.0",
     "nanoid": "^5.1.11",
     "react": "^19.2.0",

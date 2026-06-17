@@ -30,18 +30,31 @@ const EmailInput = z.object({
   recipient: z.string().min(1).max(120),
   subject: z.string().min(1).max(200),
   purpose: z.string().min(1).max(2000),
-  tone: z.enum(["Formal", "Friendly", "Persuasive"]),
+  tone: z.enum(["Professional", "Casual", "Assertive", "Empathetic"]),
+  length: z.enum(["Short", "Medium", "Detailed"]),
 });
 
 export const generateEmail = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => EmailInput.parse(input))
   .handler(async ({ data }) => {
-    const system = "You are a professional business communication assistant. Write clear, polished emails.";
-    const prompt = `Generate a ${data.tone} email based on:\n\nRecipient: ${data.recipient}\nSubject: ${data.subject}\nPurpose: ${data.purpose}\n\nWrite a complete email with greeting, body, and sign-off. Return only the email text — no commentary, no subject line prefix.`;
+    const lengthGuide: Record<typeof data.length, string> = {
+      Short: "Keep it very brief — use short bullet points where possible. Aim for under 80 words.",
+      Medium: "Write a balanced email of roughly 100-180 words in standard paragraph form.",
+      Detailed: "Write a thorough, well-structured email of 250-400 words with clear paragraphs and supporting detail.",
+    };
+    const toneGuide: Record<typeof data.tone, string> = {
+      Professional: "polished, business-appropriate, and respectful",
+      Casual: "warm, conversational, and approachable",
+      Assertive: "direct, confident, and action-oriented without being aggressive",
+      Empathetic: "understanding, considerate, and emotionally aware",
+    };
+    const system = "You are a professional business communication assistant. Write clear, polished emails that match the requested tone and length precisely.";
+    const prompt = `Generate an email with the following parameters.\n\nRecipient: ${data.recipient}\nSubject: ${data.subject}\nPurpose: ${data.purpose}\n\nTone: ${data.tone} — ${toneGuide[data.tone]}.\nLength: ${data.length} — ${lengthGuide[data.length]}\n\nWrite a complete email with greeting, body, and sign-off. Return only the email text — no commentary, no subject line prefix.`;
     const text = await runModel(system, prompt);
     await logGeneration("email");
     return { text };
   });
+
 
 const SummarizeInput = z.object({
   notes: z.string().min(10).max(20000),
