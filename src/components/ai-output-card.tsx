@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Copy, RotateCcw, Pencil, Check, Loader2 } from "lucide-react";
+import { Copy, RotateCcw, Pencil, Check } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -92,9 +93,16 @@ export function AiOutputCard({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Generating with AI…</span>
+          <div className="space-y-3 py-2" aria-busy="true" aria-label="Generating AI response">
+            <Skeleton className="h-5 w-1/3" />
+            <Skeleton className="h-4 w-[92%]" />
+            <Skeleton className="h-4 w-[88%]" />
+            <Skeleton className="h-4 w-[95%]" />
+            <Skeleton className="h-4 w-[70%]" />
+            <Skeleton className="mt-5 h-5 w-1/4" />
+            <Skeleton className="h-4 w-[90%]" />
+            <Skeleton className="h-4 w-[82%]" />
+            <Skeleton className="h-4 w-[60%]" />
           </div>
         ) : !text ? (
           <div className="py-12 text-center text-sm text-muted-foreground">
