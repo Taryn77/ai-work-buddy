@@ -32,12 +32,21 @@ export const Route = createFileRoute("/email")({
   component: EmailPage,
 });
 
-type Tone = "Formal" | "Friendly" | "Persuasive";
+type Tone = "Professional" | "Casual" | "Assertive" | "Empathetic";
+type Length = "Short" | "Medium" | "Detailed";
+
+const LENGTH_LABEL: Record<Length, string> = {
+  Short: "Short / Bullet Points",
+  Medium: "Medium",
+  Detailed: "Detailed",
+};
+
 interface EmailInput {
   recipient: string;
   subject: string;
   purpose: string;
   tone: Tone;
+  length: Length;
 }
 
 function EmailPage() {
@@ -46,17 +55,18 @@ function EmailPage() {
   const [recipient, setRecipient] = useState("");
   const [subject, setSubject] = useState("");
   const [purpose, setPurpose] = useState("");
-  const [tone, setTone] = useState<Tone>("Formal");
+  const [tone, setTone] = useState<Tone>("Professional");
+  const [length, setLength] = useState<Length>("Medium");
   const [text, setText] = useState("");
   const history = useLocalHistory<EmailInput>("history:email");
 
   const mut = useMutation({
-    mutationFn: () => fn({ data: { recipient, subject, purpose, tone } }),
+    mutationFn: () => fn({ data: { recipient, subject, purpose, tone, length } }),
     onSuccess: (r) => {
       setText(r.text);
       history.add({
         label: subject || recipient || "Untitled email",
-        input: { recipient, subject, purpose, tone },
+        input: { recipient, subject, purpose, tone, length },
         output: r.text,
       });
       qc.invalidateQueries({ queryKey: ["stats"] });
@@ -81,20 +91,34 @@ function EmailPage() {
                 <Label htmlFor="subject">Subject</Label>
                 <Input id="subject" placeholder="e.g. Q3 campaign review" value={subject} onChange={(e) => setSubject(e.target.value)} />
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Tone</Label>
+                  <Select value={tone} onValueChange={(v) => setTone(v as Tone)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Professional">Professional</SelectItem>
+                      <SelectItem value="Casual">Casual</SelectItem>
+                      <SelectItem value="Assertive">Assertive</SelectItem>
+                      <SelectItem value="Empathetic">Empathetic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Length</Label>
+                  <Select value={length} onValueChange={(v) => setLength(v as Length)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Short">{LENGTH_LABEL.Short}</SelectItem>
+                      <SelectItem value="Medium">{LENGTH_LABEL.Medium}</SelectItem>
+                      <SelectItem value="Detailed">{LENGTH_LABEL.Detailed}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="purpose">Purpose</Label>
                 <Textarea id="purpose" placeholder="Briefly describe what this email should accomplish…" value={purpose} onChange={(e) => setPurpose(e.target.value)} className="min-h-[140px]" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Tone</Label>
-                <Select value={tone} onValueChange={(v) => setTone(v as Tone)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Formal">Formal</SelectItem>
-                    <SelectItem value="Friendly">Friendly</SelectItem>
-                    <SelectItem value="Persuasive">Persuasive</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <Button className="w-full" onClick={() => mut.mutate()} disabled={!canSubmit}>
                 {mut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
@@ -110,6 +134,7 @@ function EmailPage() {
               setSubject(e.input.subject);
               setPurpose(e.input.purpose);
               setTone(e.input.tone);
+              setLength(e.input.length ?? "Medium");
               setText(e.output);
               toast.success("Loaded from history");
             }}
